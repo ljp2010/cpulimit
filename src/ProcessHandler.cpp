@@ -49,24 +49,24 @@ ProcessHandler::ProcessHandler(Config *c)
             {
                 if(this->m_cfg->GetProcessId())
                 {
-					fprintf(stdout, "Close the cpulimit attached by the process id: %d.\n", this->m_cfg->GetProcessId());
+					// fp(stdout, "Close the cpulimit attached by the process id: %d.\n", this->m_cfg->GetProcessId());
                 }
                 else
                 {
-                    fprintf(stdout, "Close the cpulimit attached by the process name: %s.\n", this->m_cfg->GetExeName());
+                    // fp(stdout, "Close the cpulimit attached by the process name: %s.\n", this->m_cfg->GetExeName());
                 }
                 Sleep(Config::TIME_SLOT*2);
             }
         }
         else
         {
-            fprintf(stderr, "cpulimit already started!\n");
+            // fp(stderr, "cpulimit already started!\n");
         }
         this->m_error += 1;
     }
     else if (this->m_cfg->GetClose())
     {
-        fprintf(stderr, "No process exists with MUTEX: %s. Exiting...\n", this->m_aMutexName);
+        // fp(stderr, "No process exists with MUTEX: %s. Exiting...\n", this->m_aMutexName);
         this->m_error += 1;
     }
     else
@@ -76,7 +76,7 @@ ProcessHandler::ProcessHandler(Config *c)
 
     if (!this->m_extOpenThread)
     {
-        fprintf(stderr, "Your system is not supported. Exiting.\n");
+        // fp(stderr, "Your system is not supported. Exiting.\n");
         this->m_error += 1;
     }
 
@@ -91,11 +91,11 @@ ProcessHandler::ProcessHandler(Config *c)
         {
             if(SetPriorityClass(GetCurrentProcess(), HIGH_PRIORITY_CLASS))
             {
-                if(this->m_cfg->GetVerbose()) fprintf(stdout, "Priority changed to %d for cpulimit.\n", HIGH_PRIORITY_CLASS);
+                //if(this->m_cfg->GetVerbose()) fp(stdout, "Priority changed to %d for cpulimit.\n", HIGH_PRIORITY_CLASS);
             }
             else
             {
-                fprintf(stderr, "Failed to set priority to %d\n", HIGH_PRIORITY_CLASS);
+                // fp(stderr, "Failed to set priority to %d\n", HIGH_PRIORITY_CLASS);
             }
         }
 
@@ -138,7 +138,7 @@ int ProcessHandler::CheckState()
     {
         if(WaitForSingleObject(this->m_Handle, 0) != WAIT_TIMEOUT)
         {
-            fprintf(stdout, "Process %d closed.\n", this->m_Id);
+            // fp(stdout, "Process %d closed.\n", this->m_Id);
             CloseHandle(this->m_Handle);
             this->m_Handle = NULL;
 			this->m_Id = NULL;
@@ -157,7 +157,7 @@ int ProcessHandler::CheckState()
 
     if(this->m_Id == GetCurrentProcessId())
     {
-        printf("Target process %d is cpulimit itself!\nAborting because it makes no sense.\n", this->m_Id);
+        // p("Target process %d is cpulimit itself!\nAborting because it makes no sense.\n", this->m_Id);
         state = 0;
     }
 
@@ -218,11 +218,11 @@ HANDLE ProcessHandler::FindHandle()
 
     if(this->m_Handle)
     {
-        fprintf(stdout, "Process %d found.\n", this->m_Id);
+        // fp(stdout, "Process %d found.\n", this->m_Id);
         SetPriorityClass(this->m_Handle, this->m_cfg->GetCodeExePriority());
         if(this->m_cfg->GetVerbose())
         {
-            fprintf(stdout, "Priority changed to %d for the process %d.\n", this->m_cfg->GetCodeExePriority(), this->m_Id);
+            // fp(stdout, "Priority changed to %d for the process %d.\n", this->m_cfg->GetCodeExePriority(), this->m_Id);
         }
         this->m_IsRunning = 1;
     }
