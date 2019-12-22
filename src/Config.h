@@ -20,7 +20,7 @@
 
 class Config
 {
-    private:
+    public:
         int m_error;
         char *m_ExeName;
         DWORD m_pid;
