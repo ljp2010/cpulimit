@@ -52,24 +52,24 @@ Config::~Config(void)
 
 void Config::PrintUsage(FILE * stream)
 {
-    fprintf(stream, "cpulimit, version %s\n", VERSION);
-    fprintf(stream, "cpulimit Copyright (C) 2012 Alexandre Quercia\n");
-    fprintf(stream, "This program comes with ABSOLUTELY NO WARRANTY. This is free software,\n");
-    fprintf(stream, "and you are welcome to redistribute it under certain conditions.\n");
-    fprintf(stream, "\n");
-    fprintf(stream, "Usage: cpulimit [OPTIONS...] TARGET\n");
-    fprintf(stream, "    OPTIONS\n");
-    fprintf(stream, "       -l, --limit=N   percentage of cpu allowed from 1 to 100\n");
-    fprintf(stream, "       -v, --verbose   show control statistics\n");
-    fprintf(stream, "       -z, --lazy      exit if there is no target process, or if it dies\n");
-    fprintf(stream, "       -I, --idle      To run the process on low priority\n");
-    fprintf(stream, "       -c, --close     Close the specified cpulimit attached to a TARGET (implies -z)\n");
-    fprintf(stream, "       -h, --help      display this help and exit\n");
-    fprintf(stream, "    TARGET must be exactly one of these:\n");
-    fprintf(stream, "       -p, --pid=N     pid of the process (implies -z)\n");
-    fprintf(stream, "       -e, --exe=FILE  name of the executable program file or path name\n");
-    fprintf(stream, "\n");
-    fprintf(stream, "Report bugs to <alquerci@email.com>.\n");
+    // fp(stream, "cpulimit, version %s\n", VERSION);
+    // fp(stream, "cpulimit Copyright (C) 2012 Alexandre Quercia\n");
+    // fp(stream, "This program comes with ABSOLUTELY NO WARRANTY. This is free software,\n");
+    // fp(stream, "and you are welcome to redistribute it under certain conditions.\n");
+    // fp(stream, "\n");
+    // fp(stream, "Usage: cpulimit [OPTIONS...] TARGET\n");
+    // fp(stream, "    OPTIONS\n");
+    // fp(stream, "       -l, --limit=N   percentage of cpu allowed from 1 to 100\n");
+    // fp(stream, "       -v, --verbose   show control statistics\n");
+    // fp(stream, "       -z, --lazy      exit if there is no target process, or if it dies\n");
+    // fp(stream, "       -I, --idle      To run the process on low priority\n");
+    // fp(stream, "       -c, --close     Close the specified cpulimit attached to a TARGET (implies -z)\n");
+    // fp(stream, "       -h, --help      display this help and exit\n");
+    // fp(stream, "    TARGET must be exactly one of these:\n");
+    // fp(stream, "       -p, --pid=N     pid of the process (implies -z)\n");
+    // fp(stream, "       -e, --exe=FILE  name of the executable program file or path name\n");
+    // fp(stream, "\n");
+    // fp(stream, "Report bugs to <alquerci@email.com>.\n");
 }
 
 int Config::GetError()
@@ -153,7 +153,7 @@ void Config::GetOpt(int argc, char **argv)
     {
         if (exe_ok && pid_ok)
         {
-            fprintf(stderr, "Error: You must specify exactly one target process, either by name or pid.\n");
+            // fp(stderr, "Error: You must specify exactly one target process, either by name or pid.\n");
             this->m_error += 1;
             Config::PrintUsage(stderr);
         }
@@ -168,7 +168,7 @@ void Config::GetOpt(int argc, char **argv)
         }
         else
         {
-            fprintf(stderr, "Error: You must specify one target process, either by name or pid.\n");
+            // fp(stderr, "Error: You must specify one target process, either by name or pid.\n");
             this->m_error += 1;
             Config::PrintUsage(stderr);
         }
@@ -176,9 +176,8 @@ void Config::GetOpt(int argc, char **argv)
 
         if (this->m_Verbose)
         {
-            printf("\n | %%CPU\t| work quantum\t| sleep quantum\t|\n");
-            printf("   %d%%\t  %6ld ms\t  %6ld ms \n", 
-                this->m_CpuUsage, this->m_nbTimeOn, this->m_nbTimeOff);
+            // p("\n | %%CPU\t| work quantum\t| sleep quantum\t|\n");
+            // p("   %d%%\t  %6ld ms\t  %6ld ms \n", this->m_CpuUsage, this->m_nbTimeOn, this->m_nbTimeOff);
         }
     }
     else
@@ -201,7 +200,7 @@ void Config::SetLimit(int l)
 {
     if (l < 1 || l > 100)
     {
-        fprintf(stderr,"Error: Limit must be in the range 1-100.\n");
+        // fp(stderr,"Error: Limit must be in the range 1-100.\n");
         this->m_error += 1;
     }
     else
