@@ -39,7 +39,7 @@ int TraverseProcesses(int *ids)
 	while(bResult)
 	{
 		int id = pe32.th32ProcessID;
-		if(id != 0) {
+		if(id != 0 && GetCurrentProcessId() != id) {
 			ids[num] = id;
 			num++;
 		}
@@ -56,7 +56,9 @@ int TraverseProcesses(int *ids)
 int main(int argc, char **argv)
 {
     Config *rootset = new Config(argc, argv);
-	rootset->SetLimit(50);
+
+	if(rootset->m_nbTimeOn == 0)
+		rootset->SetLimit(50);
 
 	int *ids = new int[maxprocess];
 	Config **setarray = new Config*[maxprocess];
@@ -64,23 +66,21 @@ int main(int argc, char **argv)
 	while(1) {
 		int num = TraverseProcesses(ids);
 
-		for(int i = 0 ; i < num - 1 ; i++) {
-			if(ids[i] != GetCurrentProcessId()) {
-				setarray[i] = new Config(argc, argv);
-				setarray[i]->SetProcessId(ids[i]);
+		for(int i = 0 ; i < num ; i++) {
+			setarray[i] = new Config(argc, argv);
+			setarray[i]->SetProcessId(ids[i]);
 
-				phs[i] = new ProcessHandler(setarray[i]);
-			}
+			phs[i] = new ProcessHandler(setarray[i]);
 		}
 
-		for(int i = 0 ; i < num - 1 ; i++) {
+		for(int i = 0 ; i < num ; i++) {
 			phs[i]->Suspend();
 		}
 
 		int s = rootset->GetTimeOff();
 		Sleep(s);
 
-		for(int i = 0 ; i < num - 1 ; i++) {
+		for(int i = 0 ; i < num ; i++) {
 			phs[i]->Resume();
 			delete phs[i];
 			delete setarray[i];
