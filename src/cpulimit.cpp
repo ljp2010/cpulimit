@@ -16,62 +16,77 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-// cpulimit.cpp : d�finit le point d'entr�e pour l'application console.
+// cpulimit.cpp : d閒init le point d'entr閑 pour l'application console.
 //
 
 #include "stdafx.h"
+#include "ProcessHandler.h"
+
+int TraverseProcesses(int *ids)
+{
+	PROCESSENTRY32 pe32;
+	pe32.dwSize = sizeof(pe32);
+
+	HANDLE hProcessSnap = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
+	if(hProcessSnap == INVALID_HANDLE_VALUE) {
+		return 0;
+	}
+
+	BOOL bResult =Process32First(hProcessSnap, &pe32);//开始遍历
+
+	int num = 0;
+
+	while(bResult)
+	{
+		int id = pe32.th32ProcessID;
+		if(id != 0) {
+			ids[num] = id;
+			num++;
+		}
+
+		bResult = Process32Next(hProcessSnap,&pe32);//返回值为false，表明进程遍历完
+	}
+
+	CloseHandle(hProcessSnap);
+	return num;
+}
+
+#define maxprocess 1024*128
 
 int main(int argc, char **argv)
 {
-    Config *settings = new Config(argc, argv);
-    if(settings->GetError())
-    {
-        //Config::PrintUsage(stderr);
-        delete settings;
-        ExitProcess(EXIT_FAILURE);
-    }
-    MyExceptionHandler::SetConfig(settings);
+    Config *rootset = new Config(argc, argv);
+	rootset->SetLimit(50);
 
+	int *ids = new int[maxprocess];
+	Config **setarray = new Config*[maxprocess];
+	ProcessHandler **phs = new ProcessHandler*[maxprocess];
+	while(1) {
+		int num = TraverseProcesses(ids);
 
-    ProcessHandler *ph = new ProcessHandler(settings);
-    if(ph->GetError())
-    {
-        delete ph;
-        delete settings;
-        ExitProcess(EXIT_FAILURE);
-    }
-    MyExceptionHandler::SetProcessHandler(ph);
+		for(int i = 0 ; i < num - 1 ; i++) {
+			if(ids[i] != GetCurrentProcessId()) {
+				setarray[i] = new Config(argc, argv);
+				setarray[i]->SetProcessId(ids[i]);
 
-    MyExceptionHandler::SignalRegister();
-    while(ph->CheckState())
-    {
-        // Control process
-        if(ph->IsOpen())
-        {
-            if(settings->GetTimeOff() > 0)
-            {
-                ph->Suspend();
-                Sleep(settings->GetTimeOff());
-                ph->Resume();
-                Sleep(settings->GetTimeOn());
-            }
-            else
-            {
-                Sleep(Config::TIME_SLOT);
-            }
-        }
-        else
-        {
-            // Wait process
-            if (settings->GetLazy())
-            {
-                break;
-            }
-            Sleep(Config::TIME_SLOT * 2);
-        }
-    }
+				phs[i] = new ProcessHandler(setarray[i]);
+			}
+		}
 
-    delete ph;
-    delete settings;
-    ExitProcess(EXIT_SUCCESS);
+		for(int i = 0 ; i < num - 1 ; i++) {
+			phs[i]->Suspend();
+		}
+
+		int s = rootset->GetTimeOff();
+		Sleep(s);
+
+		for(int i = 0 ; i < num - 1 ; i++) {
+			phs[i]->Resume();
+			delete phs[i];
+			delete setarray[i];
+		}
+
+		s = rootset->GetTimeOn();
+		Sleep(s);
+	}
 }
