@@ -51,6 +51,18 @@ int TraverseProcesses(int *ids)
 	return num;
 }
 
+int getgcd(int a, int b) {
+	if(a > b) {
+		int tmp = b;
+		b = a;
+		a = b;
+	}
+	for(int i = a ; i > 0 ; i--) {
+		if(a % i == 0 && b % i == 0) return i;
+	}
+	return 0;
+}
+
 #define maxprocess 1024*128
 
 int ids[maxprocess];
@@ -121,7 +133,11 @@ int main(int argc, char **argv)
 			phs[i]->Suspend();
 		}
 
-		int s = rootset->GetTimeOff();
+		int soff = rootset->GetTimeOff();
+		int son = rootset->GetTimeOn();
+		int gcd = getgcd(soff, son);
+
+		int s = soff / gcd;
 		Sleep(s);
 
 		for(int i = 0 ; i < maxprocess ; i++) {
@@ -129,7 +145,7 @@ int main(int argc, char **argv)
 			phs[i]->Resume();
 		}
 
-		s = rootset->GetTimeOn();
+		s = son / gcd;
 		Sleep(s);
 	}
 }
