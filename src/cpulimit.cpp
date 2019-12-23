@@ -74,9 +74,16 @@ int main(int argc, char **argv)
 {
     Config *rootset = new Config(argc, argv);
 
-	if(rootset->m_nbTimeOn == 0)
+	if(rootset->m_nbTimeOn == 0) {
+		printf("limit not set, use 50%% default\n");
 		rootset->SetLimit(50);
+	}
 
+	int soff = rootset->GetTimeOff();
+	int son = rootset->GetTimeOn();
+	float ps = 1.0 * son / (son + soff);
+		
+	printf("limit is %f%%\n", ps * 100);
 	
 	
 	phs[0] = 0;
@@ -133,9 +140,8 @@ int main(int argc, char **argv)
 			phs[i]->Suspend();
 		}
 
-		int soff = rootset->GetTimeOff();
-		int son = rootset->GetTimeOn();
-		int gcd = getgcd(soff, son);
+		//int gcd = getgcd(soff, son);
+		int gcd = 10;
 
 		int s = soff / gcd;
 		Sleep(s);
