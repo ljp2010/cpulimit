@@ -53,6 +53,11 @@ int TraverseProcesses(int *ids)
 
 #define maxprocess 1024*128
 
+int ids[maxprocess];
+	
+ProcessHandler *phs[maxprocess];
+ProcessHandler *phs2[maxprocess];
+
 int main(int argc, char **argv)
 {
     Config *rootset = new Config(argc, argv);
@@ -60,30 +65,68 @@ int main(int argc, char **argv)
 	if(rootset->m_nbTimeOn == 0)
 		rootset->SetLimit(50);
 
-	int *ids = new int[maxprocess];
-	Config **setarray = new Config*[maxprocess];
-	ProcessHandler **phs = new ProcessHandler*[maxprocess];
+	
+	
+	phs[0] = 0;
+
 	while(1) {
 		int num = TraverseProcesses(ids);
 
+		// fill phs
+		int phs2num = 0;
 		for(int i = 0 ; i < num ; i++) {
-			setarray[i] = new Config(argc, argv);
-			setarray[i]->SetProcessId(ids[i]);
+			for(int j = 0 ; j < maxprocess ; j++) {
+				if(phs[j] == 0) {
+					// find a new process
+					Config *set = (Config*)(new char[sizeof(Config)]);
+					memcpy(set, rootset, sizeof(Config));
+					set->SetProcessId(ids[i]);
+					ProcessHandler *ph = new ProcessHandler(set);
+					phs2[phs2num] = ph;
+					phs2num++;
+					break;
+				}
+				if(phs[j]->m_Id == ids[i]) {
+					phs2[phs2num] = phs[j];
+					phs2num++;
+					break;
+				}
+			}
+		}
+		phs2[phs2num] = 0;
 
-			phs[i] = new ProcessHandler(setarray[i]);
+		// clean phs
+		for(int i = 0 ; i < maxprocess ; i++) {
+			if(phs[i] == 0) break;
+			for(int j = 0 ; j < maxprocess ; j++) {
+				if(phs2[j] == 0) {
+					delete[] (char*)(phs[i]->m_cfg);
+					delete (phs[i]);
+					break;
+				}
+				if(phs2[j] == phs[i]) break;
+			}
+		}
+		for(int i = 0 ; i < maxprocess ; i++) {
+			if(phs2[i] == 0) {
+				phs[i] = 0;
+				break;
+			}
+			phs[i] = phs2[i];
 		}
 
-		for(int i = 0 ; i < num ; i++) {
+		// stop process
+		for(int i = 0 ; i < maxprocess ; i++) {
+			if(phs[i] == 0) break;
 			phs[i]->Suspend();
 		}
 
 		int s = rootset->GetTimeOff();
 		Sleep(s);
 
-		for(int i = 0 ; i < num ; i++) {
+		for(int i = 0 ; i < maxprocess ; i++) {
+			if(phs[i] == 0) break;
 			phs[i]->Resume();
-			delete phs[i];
-			delete setarray[i];
 		}
 
 		s = rootset->GetTimeOn();
