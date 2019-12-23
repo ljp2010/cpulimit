@@ -25,7 +25,7 @@ typedef DWORD (WINAPI *extSuspendProcessx)(HANDLE);
 
 class ProcessHandler
 {
-    private:
+    public:
         int m_error;
         int m_IsRunning;
         extSetProcessWorkingSetSizex m_extSetProcessWorkingSetSize;
